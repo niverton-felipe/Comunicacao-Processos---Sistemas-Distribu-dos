@@ -37,16 +37,22 @@ class Processo:
     def id_processo_executado(self, value):
         self._id_tarefa_executada = value
     
-    def _processo1(self, id_solicitante):
+    def _processo1(self, id_solicitante, uso_rpc=False):
         mensagem = f"Processo {self.id} executando tarefa 1 solicitado pelo id {id_solicitante}"
+        if uso_rpc:
+            mensagem += ' através do RPC'
         print(mensagem)
 
-    def _processo2(self, id_solicitante):
+    def _processo2(self, id_solicitante, uso_rpc=False):
         mensagem = f"Processo {self.id} executando tarefa 2 solicitado pelo id {id_solicitante}"
+        if uso_rpc:
+            mensagem += ' através do RPC'
         print(mensagem)
     
-    def _processo3(self, id_solicitante):
+    def _processo3(self, id_solicitante, uso_rpc=False):
         mensagem = f"Processo {self.id} executando tarefa 2 solicitado pelo id {id_solicitante}"
+        if uso_rpc:
+            mensagem += ' através do RPC'
         print(mensagem)
     
     def executar_tarefa_solicitada(self, numero, *args):
@@ -56,14 +62,14 @@ class Processo:
         else:
             return "Id não encontrado. Acione um processo válido."
     
-    def enviar_processo(self, controlador):
-        # escolher do processo para envio
-        id_destino_igual_origem = True
-        while id_destino_igual_origem:
-            id_destino = random.randint(0, controlador.numero_processos -1)
-            # se id_destino for igual ao id_origem, gera outro id_destino
-            if id_destino != self.id:
-                id_destino_igual_origem = False
+    def enviar_processo(self, controlador, uso_rpc=False):
+        # escolher o processo destino para receber as tarefas (se processo estiver utilizando RCP, ele é quem definira o destino)
+        #se rpc for utilizado, então será passado um id fake para a lista de tarefas
+        if uso_rpc:
+            id_destino = self.id
+        else:
+            id_destino = self._escolher_id_destino(controlador)
+        
 
         # escolher aleatoriamente número de tarefas que serão enviadas (máximo de 25 tarefas)
         numero_tarefas_solicitadas = random.randint(1, 25)
@@ -75,42 +81,17 @@ class Processo:
         lista_envio = [id_destino, self.id, lista_tarefas]
         
         return lista_envio
+    
+    def _escolher_id_destino(self, controlador):
+        # escolher do processo para envio
+        id_destino_igual_origem = True
+        while id_destino_igual_origem:
+            id_destino = random.randint(0, controlador.numero_processos -1)
+            # se id_destino for igual ao id_origem, gera outro id_destino
+            if id_destino != self.id:
+                id_destino_igual_origem = False
+        return id_destino
 
-    def receber_processo(self, tarefas, id_solicitante):
+    def receber_processo(self, tarefas, id_solicitante, uso_rpc):
         for tarefa in tarefas:
-            self.executar_tarefa_solicitada(tarefa, id_solicitante)
-
-if __name__ == "__main__":
-    lista_processos = []
-    controlador = Controlador()
-    fila_tarefas = []
-
-    while True:
-        try:
-            numero_processos = int(input("Digite o número de processos que serão criados:"))
-            if numero_processos > 0 and numero_processos < 1000 :
-                print(f"Iniciando o processo de criação dos {numero_processos} processos")
-                time.sleep(5)
-                print("-"*150)
-                break
-            else:
-                print("Por favor, digite um número inteiro maior que 0 e menor que 1000")
-        except ValueError:
-            print("Por favor, digite um número inteiro e positivo válido")
-
-    for i in range(numero_processos):
-        processo = Processo(i)
-        controlador.processo_criado()
-        lista_processos.append(processo)
-    
-    for processo in lista_processos:
-        tarefas = processo.enviar_processo(controlador)
-        fila_tarefas.append(tarefas) 
-    
-    for tarefa in fila_tarefas:
-        lista_processos[tarefa[0]].receber_processo(tarefa[2], tarefa[1])
-        print()
-
-
-
-
+            self.executar_tarefa_solicitada(tarefa, id_solicitante, uso_rpc)
