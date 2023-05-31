@@ -1,7 +1,7 @@
 class Controlador:
-    def __init__(self, numero_processos, numero_tarefas) -> None:
-        self._numero_processos = numero_processos
-        self._numero_tarefas = numero_tarefas
+    def __init__(self,) -> None:
+        self._numero_processos = 0
+        self._numero_tarefas = 3
     
     @property
     def numero_processos(self):

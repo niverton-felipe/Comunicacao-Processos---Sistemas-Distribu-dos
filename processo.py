@@ -1,6 +1,7 @@
 from datetime import datetime
 from controlador import Controlador
 import random
+import time
 
 class Processo:
     def __init__(self, id) -> None:
@@ -57,11 +58,12 @@ class Processo:
     
     def enviar_processo(self, controlador):
         # escolher do processo para envio
-        id_destino = random.randint(0, controlador.numero_processos -1)
-
-        # se id_destino for igual ao id_origem, mudar valor do id_destino
-        if id_destino == self.id:
-            id_destino += 1
+        id_destino_igual_origem = True
+        while id_destino_igual_origem:
+            id_destino = random.randint(0, controlador.numero_processos -1)
+            # se id_destino for igual ao id_origem, gera outro id_destino
+            if id_destino != self.id:
+                id_destino_igual_origem = False
 
         # escolher aleatoriamente número de tarefas que serão enviadas (máximo de 25 tarefas)
         numero_tarefas_solicitadas = random.randint(1, 25)
@@ -80,10 +82,23 @@ class Processo:
 
 if __name__ == "__main__":
     lista_processos = []
-    controlador = Controlador(0, 3)
+    controlador = Controlador()
     fila_tarefas = []
 
-    for i in range(5):
+    while True:
+        try:
+            numero_processos = int(input("Digite o número de processos que serão criados:"))
+            if numero_processos > 0 and numero_processos < 1000 :
+                print(f"Iniciando o processo de criação dos {numero_processos} processos")
+                time.sleep(5)
+                print("-"*150)
+                break
+            else:
+                print("Por favor, digite um número inteiro maior que 0 e menor que 1000")
+        except ValueError:
+            print("Por favor, digite um número inteiro e positivo válido")
+
+    for i in range(numero_processos):
         processo = Processo(i)
         controlador.processo_criado()
         lista_processos.append(processo)
